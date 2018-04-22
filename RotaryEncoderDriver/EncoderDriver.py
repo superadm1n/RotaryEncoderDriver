@@ -85,19 +85,12 @@ class Driver:
 
         while True:
 
-            # grabs the state of the GPIO pins
-            stateCLK = gpio.input(self.clk)
-            stateDT = gpio.input(self.dt)
-            stateSW = gpio.input(self.sw)
+            # gets the state of each GPIO Pin
+            stateClk, stateDt, stateSw = self._get_gpio_state()
 
-            # if the state of the GPIO pins change from their last recorded value
-            # in the dictionary it will update the dictionary value
-            if stateCLK != self.states['clk']:
-                self.states['clk'] = stateCLK
-            if stateDT != self.states['dt']:
-                self.states['dt'] = stateDT
-            if stateSW != self.states['sw']:
-                self.states['sw'] = stateSW
+            # checks for changes in the state of each of the GPIO pins and if there
+            # were changes it updates the value in the class dictionary
+            self._update_state_dictionary(stateClk, stateDt, stateSw)
 
             # If all the pins have power back to them (meaning we are in a rest state)
             if self.states['clk'] == 1 and self.states['dt'] == 1 and self.states['sw'] == 1:
@@ -127,6 +120,41 @@ class Driver:
 
         if self.states['sw'] == 0:
             self.on_press()
+
+    def _get_gpio_state(self):
+
+        '''Gathers the state of the GPIO pins.
+
+        :return: state of CLK, DT, and SW pins
+        '''
+
+        stateClk = gpio.input(self.clk)
+        stateDt = gpio.input(self.dt)
+        stateSw = gpio.input(self.sw)
+
+        return stateClk, stateDt, stateSw
+
+    def _update_state_dictionary(self, stateClk, stateDt, stateSw):
+
+        '''Checks if the states provided in the method are updated to what
+        we have recorded in the self.states dictionary and if it is new
+        it updates the self.states dictionary key with the proper value
+
+        :param stateClk: State of the CLK pin
+        :type stateClk: int
+        :param stateDt: State of the DT pin
+        :type stateDt: int
+        :param stateSw: State of the SW pin
+        :type stateSw: int
+        :return: Nothing
+        '''
+
+        if stateClk != self.states['clk']:
+            self.states['clk'] = stateClk
+        if stateDt != self.states['dt']:
+            self.states['dt'] = stateDt
+        if stateSw != self.states['sw']:
+            self.states['sw'] = stateSw
 
     def on_right(self):
 
@@ -173,23 +201,14 @@ class Driver:
         :return: Nothing
         '''
 
-
         while True:
 
             # gets the state of each GPIO Pin
-            stateClk = gpio.input(self.clk)
-            stateDt = gpio.input(self.dt)
-            stateSw = gpio.input(self.sw)
+            stateClk, stateDt, stateSw = self._get_gpio_state()
 
             # checks for changes in the state of each of the GPIO pins and if there
             # were changes it updates the value in the class dictionary
-
-            if stateClk != self.states['clk']:
-                self.states['clk'] = stateClk
-            if stateDt != self.states['dt']:
-                self.states['dt'] = stateDt
-            if stateSw != self.states['sw']:
-                self.states['sw'] = stateSw
+            self._update_state_dictionary(stateClk, stateDt, stateSw)
 
             self._analyze_state()
 
